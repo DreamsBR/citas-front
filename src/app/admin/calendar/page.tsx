@@ -72,11 +72,13 @@ export default function CalendarPage() {
 
       // Convertir citas a eventos del calendario
       const calendarEvents: CalendarEvent[] = appointments.map((apt) => {
-        const appointmentDate = new Date(apt.appointmentDate);
-        const [hours, minutes] = apt.appointmentTime.split(':');
+        // Parsear fecha correctamente sin conversión de zona horaria
+        const dateStr = apt.appointmentDate.split('T')[0]; // "2025-12-31"
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const [hours, minutes] = apt.appointmentTime.split(':').map(Number);
 
-        const start = new Date(appointmentDate);
-        start.setHours(parseInt(hours), parseInt(minutes), 0);
+        // Crear fecha en zona horaria local (sin conversión UTC)
+        const start = new Date(year, month - 1, day, hours, minutes, 0);
 
         const end = new Date(start);
         end.setHours(start.getHours() + 1); // Duración de 1 hora
