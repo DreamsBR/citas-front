@@ -34,22 +34,23 @@ export default function AdminDashboardPage() {
 
   const loadData = async () => {
     try {
-      // Obtener todas las citas y filtrar por día actual
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
       const [allAppointments, statsData] = await Promise.all([
         adminApi.getAllAppointments(filter),
         adminApi.getDashboardStats(),
       ]);
 
+      // Obtener fecha de hoy en formato YYYY-MM-DD
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0]; // "2025-12-31"
+
       // Filtrar solo citas del día actual
       const todayAppointments = allAppointments.filter(apt => {
-        const aptDate = new Date(apt.appointmentDate);
-        aptDate.setHours(0, 0, 0, 0);
-        return aptDate.getTime() === today.getTime();
+        // apt.appointmentDate puede venir como "2025-12-31" o "2025-12-31T00:00:00"
+        const aptDateStr = typeof apt.appointmentDate === 'string'
+          ? apt.appointmentDate.split('T')[0]
+          : apt.appointmentDate;
+
+        return aptDateStr === todayStr;
       });
 
       setAppointments(todayAppointments);
