@@ -71,6 +71,18 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleComplete = async (id: string) => {
+    if (!confirm('¿Marcar esta cita como completada?')) return;
+
+    try {
+      await adminApi.completeAppointment(id);
+      await loadData();
+      alert('Cita marcada como completada');
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error completando cita');
+    }
+  };
+
   const handleLogout = () => {
     authApi.logout();
     router.push('/admin/login');
@@ -248,6 +260,14 @@ export default function AdminDashboardPage() {
                             Rechazar
                           </button>
                         </div>
+                      )}
+                      {apt.status === 'confirmed' && (
+                        <button
+                          onClick={() => handleComplete(apt.id)}
+                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                        >
+                          Completar
+                        </button>
                       )}
                     </td>
                   </tr>

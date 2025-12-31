@@ -132,6 +132,11 @@ export const adminApi = {
     return data;
   },
 
+  completeAppointment: async (id: string): Promise<Appointment> => {
+    const { data } = await api.patch(`/appointments/${id}/complete`);
+    return data;
+  },
+
   getCalendarAppointments: async (
     startDate: string,
     endDate: string
