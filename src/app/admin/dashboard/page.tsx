@@ -34,11 +34,25 @@ export default function AdminDashboardPage() {
 
   const loadData = async () => {
     try {
-      const [appointmentsData, statsData] = await Promise.all([
+      // Obtener todas las citas y filtrar por día actual
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const [allAppointments, statsData] = await Promise.all([
         adminApi.getAllAppointments(filter),
         adminApi.getDashboardStats(),
       ]);
-      setAppointments(appointmentsData);
+
+      // Filtrar solo citas del día actual
+      const todayAppointments = allAppointments.filter(apt => {
+        const aptDate = new Date(apt.appointmentDate);
+        aptDate.setHours(0, 0, 0, 0);
+        return aptDate.getTime() === today.getTime();
+      });
+
+      setAppointments(todayAppointments);
       setStats(statsData);
     } catch (error) {
       console.error('Error cargando datos:', error);
@@ -109,7 +123,17 @@ export default function AdminDashboardPage() {
       <header className="bg-white shadow">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">Panel Admin - Fisioterapia</h1>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
+            <button
+              onClick={() => router.push('/admin/history')}
+              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition flex items-center gap-2"
+              title="Historial de citas"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Historial
+            </button>
             <button
               onClick={() => router.push('/admin/calendar')}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center gap-2"
@@ -148,38 +172,52 @@ export default function AdminDashboardPage() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Stats Cards */}
-        {stats && (
-          <div className="grid md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600 text-sm mb-1">Total Citas</p>
-              <p className="text-3xl font-bold text-gray-800">{stats.totalAppointments}</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600 text-sm mb-1">Pendientes</p>
-              <p className="text-3xl font-bold text-yellow-600">{stats.pendingAppointments}</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600 text-sm mb-1">Confirmadas</p>
-              <p className="text-3xl font-bold text-green-600">{stats.confirmedAppointments}</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-600 text-sm mb-1">Ingresos</p>
-              <p className="text-3xl font-bold text-blue-600">${stats.totalRevenue.toFixed(2)}</p>
-            </div>
+        {/* Stats Cards - Del día actual */}
+        <div className="grid md:grid-cols-5 gap-4 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 text-sm mb-1">Citas de Hoy</p>
+            <p className="text-3xl font-bold text-gray-800">{appointments.length}</p>
           </div>
-        )}
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 text-sm mb-1">Pendientes</p>
+            <p className="text-3xl font-bold text-yellow-600">
+              {appointments.filter(a => a.status === 'pending').length}
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 text-sm mb-1">Confirmadas</p>
+            <p className="text-3xl font-bold text-green-600">
+              {appointments.filter(a => a.status === 'confirmed').length}
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 text-sm mb-1">Completadas</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {appointments.filter(a => a.status === 'completed').length}
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 text-sm mb-1">Ingresos Hoy</p>
+            <p className="text-3xl font-bold text-purple-600">
+              ${appointments
+                .filter(a => a.status === 'completed')
+                .reduce((sum, a) => sum + parseFloat(a.price.toString()), 0)
+                .toFixed(2)}
+            </p>
+          </div>
+        </div>
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtrar Citas</h2>
-          <div className="flex space-x-4">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtrar Citas del Día</h2>
+          <div className="flex space-x-3">
             <button
               onClick={() => setFilter('')}
-              className={`px-4 py-2 rounded transition-colors ${filter === '' ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+              className={`px-4 py-2 rounded transition-colors ${filter === '' ? 'bg-gray-800 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
             >
               Todas
             </button>
@@ -194,6 +232,12 @@ export default function AdminDashboardPage() {
               className={`px-4 py-2 rounded transition-colors ${filter === 'confirmed' ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
             >
               Confirmadas
+            </button>
+            <button
+              onClick={() => setFilter('completed')}
+              className={`px-4 py-2 rounded transition-colors ${filter === 'completed' ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+            >
+              Completadas
             </button>
           </div>
         </div>
@@ -245,30 +289,54 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold text-gray-800">${apt.price}</td>
                     <td className="px-6 py-4">
-                      {apt.status === 'pending' && (
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleConfirm(apt.id)}
-                            className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
-                          >
-                            Confirmar
-                          </button>
-                          <button
-                            onClick={() => handleReject(apt.id)}
-                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
-                          >
-                            Rechazar
-                          </button>
-                        </div>
-                      )}
-                      {apt.status === 'confirmed' && (
+                      <div className="flex items-center space-x-2">
+                        {/* Ver detalles */}
                         <button
-                          onClick={() => handleComplete(apt.id)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                          onClick={() => router.push(`/admin/appointments/${apt.id}`)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Ver detalles"
                         >
-                          Completar
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
                         </button>
-                      )}
+
+                        {/* Acciones según estado */}
+                        {apt.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() => handleConfirm(apt.id)}
+                              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                              title="Confirmar"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleReject(apt.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                              title="Rechazar"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </>
+                        )}
+                        {apt.status === 'confirmed' && (
+                          <button
+                            onClick={() => handleComplete(apt.id)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                            title="Marcar como completada"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
