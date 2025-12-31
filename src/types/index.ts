@@ -30,6 +30,8 @@ export interface Specialist {
   email: string;
   phone?: string;
   bio?: string;
+  photoUrl?: string;
+  monthlySalary?: number;
   isActive: boolean;
   specialtyId: string;
   specialty?: Specialty;

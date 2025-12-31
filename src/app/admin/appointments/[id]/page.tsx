@@ -181,17 +181,9 @@ export default function AppointmentDetailsPage() {
           {appointment.confirmedAt && (
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-4">Información de Confirmación</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Confirmada el</p>
-                  <p className="text-gray-800">{new Date(appointment.confirmedAt).toLocaleString('es-ES')}</p>
-                </div>
-                {appointment.confirmedByAdmin && (
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Confirmada por</p>
-                    <p className="text-gray-800">{appointment.confirmedByAdmin.email}</p>
-                  </div>
-                )}
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Confirmada el</p>
+                <p className="text-gray-800">{new Date(appointment.confirmedAt).toLocaleString('es-ES')}</p>
               </div>
             </div>
           )}
