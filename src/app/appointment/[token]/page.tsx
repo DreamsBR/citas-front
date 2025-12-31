@@ -163,15 +163,19 @@ export default function AppointmentPage({
               <div>
                 <p className="text-sm text-gray-600 mb-1">Fecha</p>
                 <p className="text-lg font-semibold text-gray-800">
-                  {new Date(appointment.appointmentDate).toLocaleDateString(
-                    "es-ES",
-                    {
+                  {(() => {
+                    // Parsear fecha sin conversión UTC (Perú UTC-5)
+                    const dateStr = appointment.appointmentDate.split('T')[0];
+                    const [year, month, day] = dateStr.split('-').map(Number);
+                    const dateObj = new Date(year, month - 1, day);
+
+                    return dateObj.toLocaleDateString("es-ES", {
                       weekday: "long",
                       year: "numeric",
                       month: "long",
                       day: "numeric",
-                    }
-                  )}
+                    });
+                  })()}
                 </p>
               </div>
 

@@ -65,9 +65,17 @@ export default function CalendarPage() {
         endDate = moment(date).endOf('month').toDate();
       }
 
+      // Formatear fechas SIN conversión UTC (zona horaria local)
+      const formatDateLocal = (d: Date): string => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       const appointments = await adminApi.getCalendarAppointments(
-        startDate.toISOString().split('T')[0],
-        endDate.toISOString().split('T')[0]
+        formatDateLocal(startDate),
+        formatDateLocal(endDate)
       );
 
       // Convertir citas a eventos del calendario
