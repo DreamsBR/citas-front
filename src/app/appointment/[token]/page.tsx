@@ -1,14 +1,17 @@
-'use client';
+"use client";
 
-import { use, useEffect, useState } from 'react';
-import { publicApi } from '@/lib/api';
-import type { Appointment } from '@/types';
+import { useEffect, useState } from "react";
+import { publicApi } from "@/lib/api";
+import type { Appointment } from "@/types";
 
-export default function AppointmentPage({ params }: { params: Promise<{ token: string }> }) {
-  const resolvedParams = use(params);
+export default function AppointmentPage({
+  params,
+}: {
+  params: { token: string };
+}) {
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
@@ -18,27 +21,27 @@ export default function AppointmentPage({ params }: { params: Promise<{ token: s
 
   const loadAppointment = async () => {
     try {
-      const data = await publicApi.getAppointmentByToken(resolvedParams.token);
+      const data = await publicApi.getAppointmentByToken(params.token);
       setAppointment(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Cita no encontrada');
+      setError(err.response?.data?.message || "Cita no encontrada");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = async () => {
-    if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) {
+    if (!confirm("¿Estás seguro de que deseas cancelar esta cita?")) {
       return;
     }
 
     setCancelling(true);
     try {
-      await publicApi.cancelAppointment(resolvedParams.token);
+      await publicApi.cancelAppointment(params.token);
       await loadAppointment();
-      alert('Cita cancelada exitosamente');
+      alert("Cita cancelada exitosamente");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Error al cancelar la cita');
+      alert(err.response?.data?.message || "Error al cancelar la cita");
     } finally {
       setCancelling(false);
     }
@@ -59,10 +62,22 @@ export default function AppointmentPage({ params }: { params: Promise<{ token: s
     return (
       <main className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center">
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
-          <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-16 h-16 text-red-500 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Cita no encontrada</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Cita no encontrada
+          </h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <a href="/" className="text-blue-600 hover:underline">
             Volver al inicio
@@ -73,17 +88,17 @@ export default function AppointmentPage({ params }: { params: Promise<{ token: s
   }
 
   const statusColors = {
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-    confirmed: 'bg-green-100 text-green-800 border-green-300',
-    cancelled: 'bg-red-100 text-red-800 border-red-300',
-    completed: 'bg-blue-100 text-blue-800 border-blue-300',
+    pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
+    confirmed: "bg-green-100 text-green-800 border-green-300",
+    cancelled: "bg-red-100 text-red-800 border-red-300",
+    completed: "bg-blue-100 text-blue-800 border-blue-300",
   };
 
   const statusText = {
-    pending: 'Pendiente de Confirmación',
-    confirmed: 'Confirmada',
-    cancelled: 'Cancelada',
-    completed: 'Completada',
+    pending: "Pendiente de Confirmación",
+    confirmed: "Confirmada",
+    cancelled: "Cancelada",
+    completed: "Completada",
   };
 
   return (
@@ -101,18 +116,24 @@ export default function AppointmentPage({ params }: { params: Promise<{ token: s
           </div>
 
           {/* Estado de la Cita */}
-          <div className={`mb-6 p-4 rounded-lg border-2 text-center ${statusColors[appointment.status]}`}>
+          <div
+            className={`mb-6 p-4 rounded-lg border-2 text-center ${
+              statusColors[appointment.status]
+            }`}
+          >
             <p className="font-semibold text-lg">
               Estado: {statusText[appointment.status]}
             </p>
-            {appointment.status === 'pending' && (
+            {appointment.status === "pending" && (
               <p className="text-sm mt-1">
-                Recibirás un email cuando tu cita sea confirmada por nuestro equipo
+                Recibirás un email cuando tu cita sea confirmada por nuestro
+                equipo
               </p>
             )}
-            {appointment.status === 'confirmed' && (
+            {appointment.status === "confirmed" && (
               <p className="text-sm mt-1">
-                ¡Tu cita ha sido confirmada! Te esperamos en la fecha y hora indicadas
+                ¡Tu cita ha sido confirmada! Te esperamos en la fecha y hora
+                indicadas
               </p>
             )}
           </div>
@@ -134,19 +155,23 @@ export default function AppointmentPage({ params }: { params: Promise<{ token: s
               <div>
                 <p className="text-sm text-gray-600 mb-1">Especialista</p>
                 <p className="text-lg font-semibold text-gray-800">
-                  {appointment.specialist?.firstName} {appointment.specialist?.lastName}
+                  {appointment.specialist?.firstName}{" "}
+                  {appointment.specialist?.lastName}
                 </p>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600 mb-1">Fecha</p>
                 <p className="text-lg font-semibold text-gray-800">
-                  {new Date(appointment.appointmentDate).toLocaleDateString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {new Date(appointment.appointmentDate).toLocaleDateString(
+                    "es-ES",
+                    {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )}
                 </p>
               </div>
 
@@ -189,17 +214,23 @@ export default function AppointmentPage({ params }: { params: Promise<{ token: s
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-gray-600">Nombre</p>
-                <p className="text-lg text-gray-800">{appointment.patientName}</p>
+                <p className="text-lg text-gray-800">
+                  {appointment.patientName}
+                </p>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600">Email</p>
-                <p className="text-lg text-gray-800">{appointment.patientEmail}</p>
+                <p className="text-lg text-gray-800">
+                  {appointment.patientEmail}
+                </p>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600">Teléfono</p>
-                <p className="text-lg text-gray-800">{appointment.patientPhone}</p>
+                <p className="text-lg text-gray-800">
+                  {appointment.patientPhone}
+                </p>
               </div>
             </div>
           </div>
@@ -210,19 +241,20 @@ export default function AppointmentPage({ params }: { params: Promise<{ token: s
               Acciones
             </h2>
 
-            {appointment.status === 'pending' || appointment.status === 'confirmed' ? (
+            {appointment.status === "pending" ||
+            appointment.status === "confirmed" ? (
               <button
                 onClick={handleCancel}
                 disabled={cancelling}
                 className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50"
               >
-                {cancelling ? 'Cancelando...' : 'Cancelar Cita'}
+                {cancelling ? "Cancelando..." : "Cancelar Cita"}
               </button>
             ) : (
               <p className="text-center text-gray-600">
-                {appointment.status === 'cancelled'
-                  ? 'Esta cita ha sido cancelada'
-                  : 'Esta cita ya ha sido completada'}
+                {appointment.status === "cancelled"
+                  ? "Esta cita ha sido cancelada"
+                  : "Esta cita ya ha sido completada"}
               </p>
             )}
 
@@ -233,7 +265,7 @@ export default function AppointmentPage({ params }: { params: Promise<{ token: s
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
-                  alert('Link copiado al portapapeles');
+                  alert("Link copiado al portapapeles");
                 }}
                 className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition"
               >
