@@ -116,6 +116,14 @@ export const adminApi = {
     return data;
   },
 
+  updateAppointment: async (
+    id: string,
+    updateData: Partial<Appointment>
+  ): Promise<Appointment> => {
+    const { data } = await api.patch(`/appointments/${id}`, updateData);
+    return data;
+  },
+
   confirmAppointment: async (
     id: string,
     status: string
@@ -146,15 +154,103 @@ export const adminApi = {
     return data;
   },
 
+  getSpecialistRevenue: async (
+    specialistId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<any> => {
+    const { data } = await api.get('/analytics/specialist-revenue', {
+      params: { specialistId, startDate, endDate },
+    });
+    return data;
+  },
+
+  getSpecialistHours: async (
+    specialistId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<any> => {
+    const { data } = await api.get('/analytics/specialist-hours', {
+      params: { specialistId, startDate, endDate },
+    });
+    return data;
+  },
+
+  getSpecialistProfit: async (
+    specialistId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<any> => {
+    const { data } = await api.get('/analytics/specialist-profit', {
+      params: { specialistId, startDate, endDate },
+    });
+    return data;
+  },
+
   // Specialties
   getSpecialties: async (): Promise<Specialty[]> => {
     const { data } = await api.get('/specialties/all');
     return data;
   },
 
+  createSpecialty: async (specialtyData: Partial<Specialty>): Promise<Specialty> => {
+    const { data } = await api.post('/specialties', specialtyData);
+    return data;
+  },
+
+  updateSpecialty: async (
+    id: string,
+    specialtyData: Partial<Specialty>
+  ): Promise<Specialty> => {
+    const { data } = await api.patch(`/specialties/${id}`, specialtyData);
+    return data;
+  },
+
+  deleteSpecialty: async (id: string): Promise<void> => {
+    await api.delete(`/specialties/${id}`);
+  },
+
   // Specialists
   getSpecialists: async (): Promise<Specialist[]> => {
     const { data } = await api.get('/specialists');
+    return data;
+  },
+
+  getSpecialist: async (id: string): Promise<Specialist> => {
+    const { data } = await api.get(`/specialists/${id}`);
+    return data;
+  },
+
+  createSpecialist: async (specialistData: Partial<Specialist>): Promise<Specialist> => {
+    const { data } = await api.post('/specialists', specialistData);
+    return data;
+  },
+
+  updateSpecialist: async (
+    id: string,
+    specialistData: Partial<Specialist>
+  ): Promise<Specialist> => {
+    const { data } = await api.patch(`/specialists/${id}`, specialistData);
+    return data;
+  },
+
+  deleteSpecialist: async (id: string): Promise<void> => {
+    await api.delete(`/specialists/${id}`);
+  },
+
+  uploadSpecialistPhoto: async (id: string, file: File): Promise<Specialist> => {
+    const formData = new FormData();
+    formData.append('photo', file);
+    const { data } = await api.post(`/specialists/${id}/photo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data;
+  },
+
+  deleteSpecialistPhoto: async (id: string): Promise<Specialist> => {
+    const { data } = await api.delete(`/specialists/${id}/photo`);
     return data;
   },
 };
